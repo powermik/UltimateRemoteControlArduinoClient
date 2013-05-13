@@ -34,8 +34,12 @@
 Servo lenk;
 SoftwareSerial bluetooth(3, 2); // RX, TX
 
+/* define only one bluetoothmodule */
+// #define SEEEDSTUDIOBLUETOOTHSLAVE 1
+// #define CHINESEHC04
+#define SEEEDSTUDIONBLUETOOTHMASTER 1
 
-#define SEEEDSTUDIOBLUETOOTH 1
+
 #define PWMA_PIN
 #define AIN2_PIN
 #define AIN1_PIN
@@ -58,24 +62,35 @@ void setup()
 { 
   pinMode(BLUETOOTHPOWER_PIN,OUTPUT);
   digitalWrite(BLUETOOTHPOWER_PIN,LOW);
-  #if defined SEEEDSTUDIOBLUETOOTH
+
+  #if defined SEEEDSTUDIOBLUETOOTHSLAVE || defined SEEEDSTUDIONBLUETOOTHMASTER
     bluetooth.begin(38400);
   #endif
-  #if not defined SEEEDSTUDIOBLUETOOTH
+
+  #if  defined CHINESEHC04 
     bluetooth.begin(9600);
   #endif 
+
   Serial.begin(9600);
   pinMode(LED_PIN,OUTPUT);
-  digitalWrite(LED_PIN,HIGH);
-  delay(500);
+
+  #if defined DEBUG_ENABLED
+	  digitalWrite(LED_PIN,HIGH);
+	  delay(500);
+  #endif
   digitalWrite(BLUETOOTHPOWER_PIN,HIGH);
+
   setupBlueToothConnection();
-  digitalWrite(LED_PIN,LOW);
-  pinMode(LED_PIN,OUTPUT);
-  
+
+  #if defined DEBUG_ENABLED
+  	digitalWrite(LED_PIN,LOW);
+  #endif
+
   //Start
   bluetooth.print('!');
   
+
+  //attach servos and motors
   lenk.attach(LENK_PIN);  
 } 
  
@@ -96,6 +111,7 @@ void loop()
       	#if defined DEBUG_ENABLED 
           Serial.print (cmdbuf[i]);
 	#endif
+
        switch (cmdbuf[i]) {
             case '?':
               break;
@@ -141,7 +157,7 @@ void loop()
      //ready for next 
      bluetooth.print('!');
      
-     //set received parameters on hardware
+     //set received parameters on r/c model hardware
      
      i=0;
      recvChar='0';
@@ -158,7 +174,7 @@ void loop()
  
 void setupBlueToothConnection()
 {
-  #if defined SEEEDSTUDIOBLUETOOTH
+  #if defined SEEEDSTUDIOBLUETOOTHSLAVE
     showString(PSTR("\r\n+STWMOD=0\r\n")); //set the bluetooth work in slave mode
     showString(PSTR("\r\n+STNA="));
     showString(PSTR(BLUETOOTHNAME));
@@ -170,22 +186,45 @@ void setupBlueToothConnection()
     showString(PSTR("\r\n+INQ=1\r\n")); //make the slave bluetooth inquirable
     delay(2000);
     bluetooth.flush();
-
+	#if defined DEBUG_ENABLED
+		Serial.print ("bluetooth SEEEDSTUDIOBLUETOOTHSLAVE initialized\r\n");
+        #endif
   #endif
-  #if not defined SEEEDSTUDIONBLUETOOTH
+
+  #if defined SEEEDSTUDIOBLUETOOTHMASTER
+    showString(PSTR("\r\n+STWMOD=1\r\n")); //set the bluetooth work in slave mode
+    showString(PSTR("\r\n+STNA="));
+    showString(PSTR(BLUETOOTHNAME));
+    showString(PSTR("\r\n")); //set the bluetooth name
+    showString(PSTR("\r\n+STPIN=0000\r\n"));
+    showString(PSTR("\r\n+STAUTO=1\r\n"));
+    delay(2000); // This delay is required.
+    showString(PSTR("\r\n+INQ=1\r\n")); //make the slave bluetooth inquirable
+    delay(2000);
+    bluetooth.flush();
+	#if defined DEBUG_ENABLED
+		Serial.print ("bluetooth SEEEDSTUDIOBLUETOOTHMASTER initialized\r\n");
+	#endif	
+  #endif
+
+  #if defined CHINESEHC04
    delay(1500);
    showString(PSTR("AT+PIN0000")); //set the bluetooth work in slave mode
    delay(1500);
    showString(PSTR("AT+NAME"));
    showString(PSTR(BLUETOOTHNAME));
    // showString(PSTR("")); //set the bluetooth name as BLUETOOTHNAME 
+	bluetooth.flush();
    delay(2000); // This delay is required.
+	
+	#if defined DEBUG_ENABLED
+		Serial.print ("bluetooth SEEEDSTUDIOBLUETOOTHMASTER initialized\r\n");
+	#endif
   #endif
   
   Serial.flush();
   
 }
-
 
 
 //neat little trick to lower ram usage
@@ -194,4 +233,3 @@ void showString (PGM_P s) {
         while ((c = pgm_read_byte(s++)) != 0)
             bluetooth.print(c);
     }
-

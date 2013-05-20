@@ -35,9 +35,9 @@ Servo lenk;
 SoftwareSerial bluetooth(3, 2); // RX, TX
 
 /* define only one bluetoothmodule */
-// #define SEEEDSTUDIOBLUETOOTHSLAVE 1
+#define SEEEDSTUDIOBLUETOOTHSLAVE 1
 // #define CHINESEHC04
-#define SEEEDSTUDIONBLUETOOTHMASTER 1
+//#define SEEEDSTUDIONBLUETOOTHMASTER 1
 
 
 #define PWMA_PIN
@@ -98,7 +98,7 @@ void loop()
 { 
   delay(100);
     
-    if(bluetooth.available() && recvChar!='x'){
+    while(bluetooth.available() && recvChar!='x'){
       if (i>(MAXBUFFER-1)) {
            i=MAXBUFFER-1;
       }    

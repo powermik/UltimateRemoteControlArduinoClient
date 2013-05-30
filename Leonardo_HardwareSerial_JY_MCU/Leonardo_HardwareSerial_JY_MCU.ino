@@ -31,20 +31,20 @@
 #include <avr/pgmspace.h>
 #include <SoftwareSerial.h>
 
+Servo Servo09;
 Servo Servo10;
 Servo Servo11;
 Servo Servo12;
-Servo Servo13;
 //SoftwareSerial Serial1(3, 2); // RX, TX
 
 
 #define PWMA_PIN
 #define AIN2_PIN
 #define AIN1_PIN
+#define SERVO09_PIN 9
 #define SERVO10_PIN 10
 #define SERVO11_PIN 11
 #define SERVO12_PIN 12
-#define SERVO13_PIN 13
 #define LED_PIN 13
 #define BLUETOOTHPOWER_PIN 12
 #define DEBUG_ENABLED
@@ -76,10 +76,11 @@ void setup()
   //Start
   Serial1.print('!');
   
+  Servo09.attach(SERVO09_PIN);  
   Servo10.attach(SERVO10_PIN);  
   Servo11.attach(SERVO11_PIN);  
   Servo12.attach(SERVO12_PIN);  
-  Servo13.attach(SERVO13_PIN);  
+    
 } 
  
 void loop() 
@@ -157,10 +158,11 @@ void loop()
        digitalWrite(LED_PIN,LOW);
      }
      
-     servo10.write(map(A,0,255,-90,90)); 
-     servo11.write(map(B,0,255,-90,90)); 
-     servo12.write(map(C,0,255,-90,90)); 
-     servo13.write(map(D,0,255,-90,90)); 
+     Servo09.write(map(A,0,255,-90,90)); 
+     Servo10.write(map(B,0,255,-90,90)); 
+     Servo11.write(map(C,0,255,-90,90)); 
+     Servo12.write(map(D,0,255,-90,90)); 
+      
      
     }
 } 
